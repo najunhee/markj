@@ -11,15 +11,16 @@ import com.markjmind.mobile.api.android.ui.layout.JwMotion.MoveMotionListener;
 @SuppressLint("NewApi")
 public class JwMoveMotion implements MoveMotionListener{
 	private View view;
-	
 	private ACTION action;
+	private boolean result;
 	
 	public JwMoveMotion(View view){
 		this.view = view;
 		action = ACTION.ALL;
+		result = true;
 	}
 	
-	public void move(float x, float y){
+	public boolean move(float x, float y){
 		switch (action) {
 	      case ALL:
 	    	  allMove(x,y);
@@ -42,11 +43,20 @@ public class JwMoveMotion implements MoveMotionListener{
 	      case VERTICALITY:
 	    	  verticalityMove(x);
 	          break;
+	      case NONE:
+	    	  return true;
 	    }
+		return result;
 	}
 	
-	public void setMoveAction(ACTION action){
+	public JwMoveMotion setResult(boolean result){
+		this.result = result;
+		return this;
+	}
+	
+	public JwMoveMotion setMoveAction(ACTION action){
 		this.action = action;
+		return this;
 	}
 	
 	private void allMove(float x, float y){

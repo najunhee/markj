@@ -1,22 +1,28 @@
 package com.markjmind.mobile.api.android.ui.layout;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.View;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.View.OnTouchListener;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 
-@SuppressLint("NewApi")
+@SuppressLint({ "NewApi", "ClickableViewAccessibility" })
 public class JwMotion extends SimpleOnGestureListener{
+	/**
+	 * 이동되는 타겟뷰
+	 */
 	private View view;
 	private GestureDetector gestureDetector;
+	
 	public JwMoveMotion move;
 	private MoveMotionListener moveMotionListener;
 	private boolean isFirstMove = false;
 	private float tempRawX=0f,tempRawY=0f;
+	
+	public JwFlingMotion fling;
+	private FlingMotionListener flingMotionListener;
     
 	public static enum ACTION{
 		NONE,
@@ -31,11 +37,19 @@ public class JwMotion extends SimpleOnGestureListener{
 	
 	
 	interface MoveMotionListener{
-		public void move(float x, float y);
+		public boolean move(float x, float y);
+	}
+	interface FlingMotionListener{
+		public boolean fling(float distanceX, float distanceY,float velocityX, float velocityY);
 	}
 	
-	public void setMoveMotionListener(MoveMotionListener moveMotion){
+	public JwMotion setMoveMotionListener(MoveMotionListener moveMotion){
 		this.moveMotionListener = moveMotion;
+		return this;
+	}
+	public JwMotion setFlingMotionListener(FlingMotionListener flingMotionListener){
+		this.flingMotionListener = flingMotionListener;
+		return this;
 	}
 	/**
      * fling 감지 수치
@@ -46,7 +60,9 @@ public class JwMotion extends SimpleOnGestureListener{
 	public JwMotion(View view){
 		this.view = view;
 		move = new JwMoveMotion(view);
+		fling = new JwFlingMotion(view);
 		setMoveMotionListener(move);
+		setFlingMotionListener(fling);
 	}
 	
 	public GestureDetector getGestureDetector(){
@@ -127,25 +143,8 @@ public class JwMotion extends SimpleOnGestureListener{
      public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
     	float distanceX = e2.getX()-e1.getX();
 		float distanceY = e2.getY()-e1.getY();
-		
-		if(velocityX>velocityY){
-			if(Math.abs(distanceX)<flingSensing){
-				return Hfling(distanceX>0,Math.abs(distanceX),velocityX);
-			}
-		}else{
-			if(Math.abs(distanceY)<flingSensing){
-				return Vfling(distanceY>0,Math.abs(distanceY),velocityY);
-			}
-		}
+		flingMotionListener.fling(distanceX, distanceY, velocityX, velocityY);
          return true;
-    }
-    
-    public boolean Hfling(boolean isLeft, float distanceX,float velocityX){
-    	return true;
-    }
-    
-    public boolean Vfling(boolean isDown, float distanceY,float velocityX){
-    	return true;
     }
     
 }
