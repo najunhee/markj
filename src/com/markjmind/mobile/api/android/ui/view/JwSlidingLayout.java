@@ -262,7 +262,7 @@ public class JwSlidingLayout extends LinearLayout{
 			float y = e2.getY()-e1.getY();
 			
 			if((position==Position.LEFT || position==Position.RIGHT )){
-				if(Math.abs(x)<0.5f){
+				if(Math.abs(x)<0.3f){
 					return false;
 				}
 //				Log.d("onFling","가로 velocityX:"+velocityX+" ,x:"+x+"("+(Math.abs(x)>=Math.abs(y))+")");
@@ -270,7 +270,7 @@ public class JwSlidingLayout extends LinearLayout{
 				isFling = true;
 				aniMove(x);
 			}else if((position==Position.TOP || position==Position.BOTTOM)){
-				if(Math.abs(y)<0.5f){
+				if(Math.abs(y)<0.3f){
 					return false;
 				}
 				isDrag = false;

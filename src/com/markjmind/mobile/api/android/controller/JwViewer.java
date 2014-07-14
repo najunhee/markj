@@ -45,6 +45,7 @@ public class JwViewer {
 	private Context context;
 	private Activity activity;
 	private Dialog dialog;
+	private FrameLayout frame;
 	private View preViewer;
 	private View viewer;
 	private ViewGroup parentView;
@@ -113,6 +114,7 @@ public class JwViewer {
 			this.activity = activity;
 			this.context = activity;
 		}
+		frame = new FrameLayout(context);
 	}
 	/**
 	 * Viewer를 초기화 한다.
@@ -126,6 +128,7 @@ public class JwViewer {
 			this.dialog = dialog;
 			this.context = dialog.getContext();
 		}
+		frame = new FrameLayout(context);
 	}
 	
 /********************************** Activity, Dialog 분별 ***************************************************/
@@ -384,9 +387,9 @@ public class JwViewer {
 				Log.e("뷰어", "노캐쉬!");
 			}
 		}
-		
+		JwMemberMapper.injectField(JwViewer.this);
 		if(inAnimation!=null){
-			viewer.setAnimation(inAnimation);
+			frame.setAnimation(inAnimation);
 		}
 	}
 	
@@ -593,31 +596,41 @@ public class JwViewer {
 			final View[] childArr = new View[parentView.getChildCount()];
 			for(int i=0;i<childArr.length;i++){
 				childArr[i] = parentView.getChildAt(i);
-				outAnimation.setAnimationListener(new RemoveAnimation(childArr[i]));
+//				outAnimation.setAnimationListener(new RemoveAnimation(childArr[i]));
 				childArr[i].startAnimation(outAnimation);
+				parentView.removeView(childArr[i]);
 			}
 		}else{
-			parentView.removeAllViews();
-		}
-	}
-	class RemoveAnimation implements AnimationListener{
-		View view;
-		public RemoveAnimation(View view){
-			this.view = view;
-		}
-		@Override
-		public void onAnimationEnd(Animation arg0) {
-		}
-		@Override
-		public void onAnimationRepeat(Animation arg0) {
-		}
-		@Override
-		public void onAnimationStart(Animation arg0) {
-			if(view!=null){
-				parentView.removeView(view);
+			if(parentView!=null){
+				parentView.removeAllViews();
 			}
 		}
 	}
+//	class RemoveAnimation implements AnimationListener{
+//		View view;
+//		public RemoveAnimation(View view){
+//			this.view = view;
+//		}
+//		@Override
+//		public void onAnimationEnd(Animation arg0) {
+//		
+//		}
+//		@Override
+//		public void onAnimationRepeat(Animation arg0) {
+//		}
+//		@Override
+//		public void onAnimationStart(Animation arg0) {
+//			view.post(new Runnable() {
+//		          @Override
+//		          public void run() {
+//		        	  if(view!=null && parentView!=null){
+//		  				parentView.removeView(view);
+//		  			}
+//		          }
+//		        });
+//		}
+//	}
+	
 	/**
 	 * index에 해당하는 부모 ViewGroup아래 JwViewer를 추가한다.
 	 * @param parents 부모 ViewGroup
@@ -634,10 +647,11 @@ public class JwViewer {
 			jv.excute(TASK_APUT);
 		}else{
 			jv.viewerInit(true);
+			jv.frame.addView(jv.viewer,jv.parentView.getLayoutParams());
 			if(index==-1){
-				jv.parentView.addView(jv.viewer);
+				jv.parentView.addView(jv.frame);
 			}else{
-				jv.parentView.addView(jv.viewer);
+				jv.parentView.addView(jv.frame,index);
 			}
 			jv.view_init();
 		}
@@ -669,6 +683,43 @@ public class JwViewer {
 	}
 	
 	/**
+	 * 부모 ViewGroup 아래의 View들을 모두 지우고<br>
+	 * 현재 Viewer로 변경한다.
+	 * @param parents 부모 ViewGroup
+	 * @return
+	 */
+	public JwViewer change(ViewGroup parents){
+		parentView = parents;
+		boolean cache = (isCache && JwViewerCache.contain(layoutId,parents));
+		if(async && !cache){
+			excute(TASK_ACV);
+		}else{
+			cancelTaskAcv();
+			removeAllViews();
+			viewerInit(false);
+			frame.addView(viewer,parentView.getLayoutParams());
+			parentView.addView(frame,parentView.getLayoutParams());
+			if(!cache){
+				view_init();
+			}
+		}
+		ableRefresh = true;
+		return this;
+	}
+	
+	/**
+	 * 부모 ViewGroup 아래의 View들을 모두 지우고<br>
+	 * 현재 Viewer로 변경한다.
+	 * @param parents 부모 ViewGroup ID
+	 * @return
+	 */
+	public JwViewer change(int R_id_parents){
+		ViewGroup parents = getParentsToContext(R_id_parents);
+		return change(parents);
+	}
+	
+	
+	/**
 	 * 부모 ViewGroup아래 JwViewer를 추가한다.
 	 * @param R_id_parents 부모 ViewGroup ID
 	 * @return
@@ -694,22 +745,22 @@ public class JwViewer {
 		return ableRefresh;
 	}
 	
-	public JwViewer refresh(){
-		if(ableRefresh){
-			if(async){
-				excute(TASK_ACV);
-			}else{
-				cancelTaskAcv();
-				viewerInit(true);
-				removeAllViews();
-				parentView.addView(viewer);
-				view_init();
-			}
-			ableRefresh = true;
-			return this;
-		}
-		return this;
-	}
+//	public JwViewer refresh(){
+//		if(ableRefresh){
+//			if(async){
+//				excute(TASK_ACV);
+//			}else{
+//				cancelTaskAcv();
+//				viewerInit(true);
+//				removeAllViews();
+//				parentView.addView(viewer);
+//				view_init();
+//			}
+//			ableRefresh = true;
+//			return this;
+//		}
+//		return this;
+//	}
 	
 	public static JwViewer getViewerCache(int layoutId, ViewGroup parents){
 		JwViewer jv = JwViewerCache.get(layoutId, parents);
@@ -723,55 +774,15 @@ public class JwViewer {
 		ViewGroup parents = (ViewGroup)Jwc.getView(parents_id, dialog);
 		return getViewerCache(layoutId, parents);
 	}
-	/**
-	 * 부모 ViewGroup 아래의 View들을 모두 지우고<br>
-	 * 현재 Viewer로 변경한다.
-	 * @param parents 부모 ViewGroup
-	 * @return
-	 */
-	public JwViewer change(ViewGroup parents){
-		parentView = parents;
-		boolean cache = (isCache && JwViewerCache.contain(layoutId,parents));
-		if(async && !cache){
-			excute(TASK_ACV);
-		}else{
-			cancelTaskAcv();
-			viewerInit(false);
-			removeAllViews();
-			parentView.addView(viewer);
-			if(!cache){
-				view_init();
-			}
-		}
-		ableRefresh = true;
-		return this;
-	}
-	
-	/**
-	 * 부모 ViewGroup 아래의 View들을 모두 지우고<br>
-	 * 현재 Viewer로 변경한다.
-	 * @param parents 부모 ViewGroup ID
-	 * @return
-	 */
-	public JwViewer change(int R_id_parents){
-		ViewGroup parents = getParentsToContext(R_id_parents);
-		return change(parents);
-	}
-	
 	
 	public ViewGroup setPreView(int R_layout_id){
-		if(parentView!=null){
-			if(TASK_ACV.equals(task)){
-				removeAllViews();
-			}
-		}
 		// TODO 이부분 때문에 Add시 viewer랑 AsyncTask객체가 1:1만 이루어져야함
 		//그래서 jwviewer instance 하나에 한번만 async가능 
 		//하나의 instance로 add를 연속적으로 할경우 문제 발생 가능성 큼
 		//현재 새로운 객체를 생성해서 Add 하게함
 		preViewer = (ViewGroup) getLayoutInfalter(R_layout_id);
 		preViewer.setLayoutParams(getParent().getLayoutParams());
-		((ViewGroup)getParent()).addView(preViewer);
+		frame.addView(preViewer,parentView.getLayoutParams());
 		return (ViewGroup)preViewer;
 	}
 	
@@ -796,12 +807,9 @@ public class JwViewer {
 	}
 
 	public void view_pre(){
-		if(parentView!=null){
-			if(TASK_ACV.equals(task)){
-				removeAllViews();
-			}
-		}
+
 	}
+	
 	public void onProgressUpdate(Integer... values){
 	}
 	public void onCancelled(){
@@ -827,15 +835,14 @@ public class JwViewer {
 		
 		@Override
 		protected void onPreExecute() {
-			if(preload){
-				viewerInit(true);
-				if(TASK_ACV.equals(task)){
-					jv.removeAllViews();
-				}
-				parentView.addView(viewer,parentView.getLayoutParams());	
-			}else{
-				jv.view_pre();
+			if(TASK_ACV.equals(task)){
+				jv.removeAllViews();
 			}
+			jv.parentView.addView(jv.frame,jv.parentView.getLayoutParams());
+			if(preload){
+				jv.frame.addView(jv.viewer,jv.parentView.getLayoutParams());
+			}
+			jv.view_pre();
 		}
 		@Override
 		protected void onCancelled() {
@@ -858,12 +865,7 @@ public class JwViewer {
 			}
 			boolean isView = (Boolean)result;
 			if(isView){
-				if(preload){
-					
-				}else{
-					viewerBind(jv, task);
-				}
-				JwMemberMapper.injectField(JwViewer.this);
+				viewerBind(jv, task);
 				view_init();
 			}else{
 				view_fail();
@@ -876,22 +878,25 @@ public class JwViewer {
 		ViewGroup parentView = jv.getParent();
 		int viewerIndex = -1;
 		if(TASK_ACV.equals(task)){
-			jv.removeAllViews();
+			if(!jv.preload){
+				jv.frame.removeAllViews();
+			}
 		}else{
 			for(int i=0;i<parentView.getChildCount();i++){
-				if(jv.preViewer == parentView.getChildAt(i)){
+				if(jv.frame == parentView.getChildAt(i)){
 					viewerIndex = i;
 					break;
 				}
 			}
-			parentView.removeView(jv.preViewer);
+			jv.frame.removeAllViews();
 		}
 		jv.viewerInit(true);
 		if(viewerIndex>=0){
-			parentView.addView(jv.viewer,viewerIndex,parentView.getLayoutParams());
+			jv.frame.addView(jv.viewer,viewerIndex,jv.parentView.getLayoutParams());
 		}else{
-			parentView.addView(jv.viewer,parentView.getLayoutParams());
+			jv.frame.addView(jv.viewer,jv.parentView.getLayoutParams());
 		}
+		
 	}
 	
 	public String getTaskKey(String taskName){
