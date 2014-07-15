@@ -2,18 +2,18 @@ package com.markjmind.mobile.api.android.ui.layout;
 
 import android.view.View;
 
-import com.markjmind.mobile.api.android.ui.layout.JwMotion.ACTION;
+import com.markjmind.mobile.api.android.ui.layout.JwMotion.DIRECTION;
 import com.markjmind.mobile.api.android.ui.layout.JwMotion.FlingMotionListener;
 
 public class JwFlingMotion implements FlingMotionListener{
 	private View view;
-	private ACTION action;
+	private DIRECTION action;
 	private boolean result;
 	private float flingSensing = 0.3f;
 	
 	public JwFlingMotion(View view){
 		this.view = view;
-		action = ACTION.ALL;
+		action = DIRECTION.ALL;
 		result = true;
 	}
 	@Override
@@ -51,7 +51,7 @@ public class JwFlingMotion implements FlingMotionListener{
 		return this;
 	}
 	
-	public JwFlingMotion setMoveAction(ACTION action){
+	public JwFlingMotion setMoveAction(DIRECTION action){
 		this.action = action;
 		return this;
 	}

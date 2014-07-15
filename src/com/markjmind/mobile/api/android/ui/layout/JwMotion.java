@@ -1,5 +1,8 @@
 package com.markjmind.mobile.api.android.ui.layout;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.SuppressLint;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -7,6 +10,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 
 @SuppressLint({ "NewApi", "ClickableViewAccessibility" })
 public class JwMotion extends SimpleOnGestureListener{
@@ -20,11 +24,16 @@ public class JwMotion extends SimpleOnGestureListener{
 	private MoveMotionListener moveMotionListener;
 	private boolean isFirstMove = false;
 	private float tempRawX=0f,tempRawY=0f;
-	
 	public JwFlingMotion fling;
 	private FlingMotionListener flingMotionListener;
-    
-	public static enum ACTION{
+	private float minX=0f;
+	private float maxX=0f;
+	private float minY=0f;
+	private float maxY=0f;
+	
+	
+	
+	public static enum DIRECTION{
 		NONE,
 		ALL,
 		LEFT,
@@ -35,6 +44,26 @@ public class JwMotion extends SimpleOnGestureListener{
 		VERTICALITY
 	}
 	
+	public JwMotion(View view){
+		this.view = view;
+		init();
+	}
+	
+	private void init(){
+		move = new JwMoveMotion(view);
+		fling = new JwFlingMotion(view);
+		setMoveMotionListener(move);
+		setFlingMotionListener(fling);
+		view.post(new Runnable() {
+			@Override
+			public void run() {
+				ViewGroup parents = (ViewGroup)view.getParent();
+				setSize(minX,minY,parents.getWidth()-view.getWidth(),parents.getHeight()-view.getHeight());
+			}
+		});
+		
+		
+	}
 	
 	interface MoveMotionListener{
 		public boolean move(float x, float y);
@@ -51,19 +80,7 @@ public class JwMotion extends SimpleOnGestureListener{
 		this.flingMotionListener = flingMotionListener;
 		return this;
 	}
-	/**
-     * fling 감지 수치
-     */
-    private float flingSensing = 0.3f;
-    
-
-	public JwMotion(View view){
-		this.view = view;
-		move = new JwMoveMotion(view);
-		fling = new JwFlingMotion(view);
-		setMoveMotionListener(move);
-		setFlingMotionListener(fling);
-	}
+	  
 	
 	public GestureDetector getGestureDetector(){
 		if(gestureDetector==null){
@@ -104,7 +121,7 @@ public class JwMotion extends SimpleOnGestureListener{
 
     @Override
      public boolean onDoubleTap(MotionEvent ev) {
-         Log.w("TEST", "onDoubleTap = "+ev.toString());
+    	 move.magnet(1000);
          return super.onDoubleTap(ev);
      }
 
@@ -122,7 +139,7 @@ public class JwMotion extends SimpleOnGestureListener{
 	public void onLongPress(MotionEvent e) {
 		super.onLongPress(e);
 	}
-	
+
     @Override
      public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
     	if(moveMotionListener!=null){
@@ -130,6 +147,8 @@ public class JwMotion extends SimpleOnGestureListener{
     			float x = e2.getRawX()-tempRawX;
     			float y = e2.getRawY()-tempRawY;
     			moveMotionListener.move(x, y);
+    		}else{
+    			// TODO 처음 움직임 감지시 이벤트 추가
     		}
     		tempRawX = e2.getRawX();
 			tempRawY = e2.getRawY();
@@ -137,14 +156,34 @@ public class JwMotion extends SimpleOnGestureListener{
     	isFirstMove = false;
         return true;
      }
-
-
+    
     @Override
      public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
     	float distanceX = e2.getX()-e1.getX();
 		float distanceY = e2.getY()-e1.getY();
+	
 		flingMotionListener.fling(distanceX, distanceY, velocityX, velocityY);
-         return true;
+        return true;
     }
+	public float getMinX() {
+		return minX;
+	}
+	public float getMaxX() {
+		return maxX;
+	}
+	public float getMinY() {
+		return minY;
+	}
+	public float getMaxY() {
+		return maxY;
+	}
+	public JwMotion setSize(float minX,float minY,float maxX,float maxY) {
+		this.minX = minX;
+		this.minY = minY;
+		this.maxX = maxX;
+		this.maxY = maxY;
+		move.setSize(minX, minY, maxX, maxY);
+		return this;
+	}
     
 }
