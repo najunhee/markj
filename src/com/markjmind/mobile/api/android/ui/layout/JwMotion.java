@@ -19,6 +19,10 @@ public class JwMotion extends SimpleOnGestureListener{
 	 */
 	private View view;
 	private GestureDetector gestureDetector;
+	public enum ACTION{
+		NONE,SCROLL,FLING
+	}
+	private ACTION currAction=ACTION.NONE;
 	
 	public JwMoveMotion move;
 	private MoveMotionListener moveMotionListener;
@@ -30,6 +34,7 @@ public class JwMotion extends SimpleOnGestureListener{
 	private float maxX=0f;
 	private float minY=0f;
 	private float maxY=0f;
+	private int moveAnimDuration=300;
 	
 	
 	
@@ -90,15 +95,50 @@ public class JwMotion extends SimpleOnGestureListener{
 		return gestureDetector;
 	}
 	
-	public OnTouchListener getOnTouchListener(){
+	public OnTouchListener getOnTouchListener() {
 		OnTouchListener otl = new OnTouchListener() {
 			@Override
-			public boolean onTouch(View paramView, MotionEvent paramMotionEvent) {
-				getGestureDetector().onTouchEvent(paramMotionEvent);
+			public boolean onTouch(View paramView, MotionEvent event) {
+				final int action = event.getAction();
+				switch (action & MotionEvent.ACTION_MASK) {
+					case MotionEvent.ACTION_DOWN: {
+						break;
+					}
+					case MotionEvent.ACTION_UP: {
+						endingMotion();
+						currAction=ACTION.NONE;
+						break;
+					}
+					case MotionEvent.ACTION_MOVE: {
+						break;
+					}
+					case MotionEvent.ACTION_POINTER_DOWN: {
+						break;
+					}
+					case MotionEvent.ACTION_CANCEL: {
+						break;
+					}
+	
+					case MotionEvent.ACTION_POINTER_UP: {
+						break;
+					}
+				}
+				getGestureDetector().onTouchEvent(event);
 				return true;
 			}
 		};
 		return otl;
+	}
+	private void endingMotion(){
+		switch(currAction){
+			case SCROLL: {
+				move.magnet(moveAnimDuration);
+				break;
+			}
+			case FLING: {
+				break;
+			}
+		}
 	}
 	
 	
@@ -121,7 +161,6 @@ public class JwMotion extends SimpleOnGestureListener{
 
     @Override
      public boolean onDoubleTap(MotionEvent ev) {
-    	 move.magnet(1000);
          return super.onDoubleTap(ev);
      }
 
@@ -142,6 +181,7 @@ public class JwMotion extends SimpleOnGestureListener{
 
     @Override
      public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+    	currAction = ACTION.SCROLL;
     	if(moveMotionListener!=null){
     		if(!isFirstMove){
     			float x = e2.getRawX()-tempRawX;
@@ -159,9 +199,9 @@ public class JwMotion extends SimpleOnGestureListener{
     
     @Override
      public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+    	currAction = ACTION.FLING;
     	float distanceX = e2.getX()-e1.getX();
 		float distanceY = e2.getY()-e1.getY();
-	
 		flingMotionListener.fling(distanceX, distanceY, velocityX, velocityY);
         return true;
     }

@@ -2,9 +2,12 @@ package com.markjmind.mobile.api.android.ui.layout;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import com.markjmind.mobile.api.android.ui.layout.JwMotion.DIRECTION;
 import com.markjmind.mobile.api.android.ui.layout.JwMotion.MoveMotionListener;
@@ -21,6 +24,7 @@ public class JwMoveMotion implements MoveMotionListener{
 	private DIRECTION magnet;
 	private ObjectAnimator moveAnimX;
 	private ObjectAnimator moveAnimY;
+	private TimeInterpolator interpolator;
 	
 	public JwMoveMotion(View view){
 		this.view = view;
@@ -30,6 +34,7 @@ public class JwMoveMotion implements MoveMotionListener{
 	private void init(){
 		action = DIRECTION.ALL;
 		magnet = DIRECTION.ALL;
+		interpolator = new AccelerateDecelerateInterpolator();
 		result = true;
 	}
 	
@@ -120,26 +125,19 @@ public class JwMoveMotion implements MoveMotionListener{
 		boolean right = (maxX-minX)/2<currX;
 		boolean bottom = (maxY-minY)/2<currY;
 		AnimatorSet animSet = new AnimatorSet();
-		long durationX = (long)(duration*currX/(maxX-minX));
-		long durationY = (long)(duration*currY/(maxY-minY));
-		
+		moveAnimX = ObjectAnimator.ofFloat(view,"x",currX,minX);
+		moveAnimY = ObjectAnimator.ofFloat(view,"y",currY,minY);
 		
 		if(right){
-			moveAnimX.setFloatValues(currX,maxX-minX);
-			durationX = (long)(duration-duration*currX/(maxX-minX));
-		}else{
-			moveAnimX.setFloatValues(currX,minX);
-			durationX = (long)(duration*currX/(maxX-minX));
+			moveAnimX.setFloatValues(currX,maxX);
 		}
 		if(bottom){
-			moveAnimY.setFloatValues(currY,maxY-minY);
-			durationY = (long)(duration-duration*currY/(maxY-minY));
-		}else{
-			moveAnimY.setFloatValues(currY,minY);
-			durationY = (long)(duration*currY/(maxY-minY));
+			moveAnimY.setFloatValues(currY,maxY);
 		}
-		moveAnimX.setDuration(durationX);
-		moveAnimY.setDuration(durationY);
+		moveAnimX.setInterpolator(interpolator);
+		moveAnimY.setInterpolator(interpolator);
+		moveAnimX.setDuration(duration);
+		moveAnimY.setDuration(duration);
 		switch (magnet) {
 	      case ALL:
 	    	  animSet.play(moveAnimX).with(moveAnimY);
@@ -179,8 +177,6 @@ public class JwMoveMotion implements MoveMotionListener{
 		this.minY = minY;
 		this.maxX = maxX;
 		this.maxY = maxY;
-		moveAnimX = ObjectAnimator.ofFloat(view,"x",minX,maxX);
-		moveAnimY = ObjectAnimator.ofFloat(view,"y",minY,maxY);
 		return this;
 	}
     
