@@ -138,6 +138,9 @@ public class JwMotion extends SimpleOnGestureListener{
 			case FLING: {
 				break;
 			}
+			case NONE: {
+				break;
+			}
 		}
 	}
 	
