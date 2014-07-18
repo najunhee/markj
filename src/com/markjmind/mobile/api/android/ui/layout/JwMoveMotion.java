@@ -10,24 +10,18 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 import com.markjmind.mobile.api.android.ui.layout.JwMotion.DIRECTION;
-import com.markjmind.mobile.api.android.ui.layout.JwMotion.MoveMotionListener;
+import com.markjmind.mobile.api.android.ui.layout.JwMotion.ScrollMotionListener;
 
 @SuppressLint("NewApi")
-public class JwMoveMotion implements MoveMotionListener{
-	private View view;
+public class JwMoveMotion implements ScrollMotionListener{
 	private DIRECTION action;
 	private boolean result;
-	private float minX;
-	private float maxX;
-	private float minY;
-	private float maxY;
 	private DIRECTION magnet;
 	private ObjectAnimator moveAnimX;
 	private ObjectAnimator moveAnimY;
 	private TimeInterpolator interpolator;
 	
-	public JwMoveMotion(View view){
-		this.view = view;
+	public JwMoveMotion(){
 		init();
 	}
 	
@@ -39,33 +33,33 @@ public class JwMoveMotion implements MoveMotionListener{
 	}
 	
 	
-	public boolean move(float x, float y){
+	public boolean scroll(View view, float x, float y, MotionSize size){
 		switch (action) {
 	      case ALL:
-	    	  setMoveX(x);
-	    	  setMoveY(y);
+	    	  setMoveX(view,x,size);
+	    	  setMoveY(view,y,size);
 	          break;
 	      case LEFT:
 	    	  if(x<0)
-	  			setMoveX(x);
+	  			setMoveX(view,x,size);
 	          break;
 	      case RIGHT:
 	    	  if(x>0)
-	  			setMoveX(x);
+	  			setMoveX(view,x,size);
 	          break;
 	      case TOP:
 	    	  if(y<0)
-	  			setMoveY(y);
+	  			setMoveY(view,y,size);
 	          break;
 	      case BOTTOM:
 	    	  if(y>0)
-	  			setMoveY(y);
+	  			setMoveY(view,y,size);
 	          break;
 	      case HORIZONTAL:
-	    	  setMoveX(x);
+	    	  setMoveX(view,x,size);
 	          break;
 	      case VERTICALITY:
-	    	  setMoveY(y);
+	    	  setMoveY(view,y,size);
 	          break;
 	      case NONE:
 	    	  return true;
@@ -83,25 +77,25 @@ public class JwMoveMotion implements MoveMotionListener{
 		return this;
 	}
 	
-	public JwMoveMotion setMoveX(float x){
+	public JwMoveMotion setMoveX(View view,float x, MotionSize size){
 		float moving = view.getX()+x;
-		if(moving<=minX){
-			view.setX(minX);
+		if(moving<=size.minX){
+			view.setX(size.minX);
 			// TODO X축이 0일때 처리
-		}else if(moving>=maxX){
-			view.setX(maxX);
+		}else if(moving>=size.maxX){
+			view.setX(size.maxX);
 		}else{
 			view.setX(moving);
 		}
 		return this;
 	}
-	public JwMoveMotion setMoveY(float y){
+	public JwMoveMotion setMoveY(View view,float y, MotionSize size){
 		float moving = view.getY()+y;
-		if(moving<=minY){
-			view.setY(minY);
+		if(moving<=size.minY){
+			view.setY(size.minY);
 			// TODO X축이 0일때 처리
-		}else if(moving>=maxY){
-			view.setY(maxY);
+		}else if(moving>=size.maxY){
+			view.setY(size.maxY);
 		}else{
 			view.setY(moving);
 		}
@@ -119,20 +113,20 @@ public class JwMoveMotion implements MoveMotionListener{
 		return this;
 	}
 	
-	public void magnet(int duration){
+	public void magnet(View view,int duration, MotionSize size){
 		float currX = view.getX();
 		float currY = view.getY();
-		boolean right = (maxX-minX)/2<currX;
-		boolean bottom = (maxY-minY)/2<currY;
+		boolean right = (size.maxX-size.minX)/2<currX;
+		boolean bottom = (size.maxY-size.minY)/2<currY;
 		AnimatorSet animSet = new AnimatorSet();
-		moveAnimX = ObjectAnimator.ofFloat(view,"x",currX,minX);
-		moveAnimY = ObjectAnimator.ofFloat(view,"y",currY,minY);
+		moveAnimX = ObjectAnimator.ofFloat(view,"x",currX,size.minX);
+		moveAnimY = ObjectAnimator.ofFloat(view,"y",currY,size.minY);
 		
 		if(right){
-			moveAnimX.setFloatValues(currX,maxX);
+			moveAnimX.setFloatValues(currX,size.maxX);
 		}
 		if(bottom){
-			moveAnimY.setFloatValues(currY,maxY);
+			moveAnimY.setFloatValues(currY,size.maxY);
 		}
 		moveAnimX.setInterpolator(interpolator);
 		moveAnimY.setInterpolator(interpolator);
@@ -160,24 +154,10 @@ public class JwMoveMotion implements MoveMotionListener{
 		animSet.start();
 	}
 	
-	public float getMinX() {
-		return minX;
-	}
-	public float getMaxX() {
-		return maxX;
-	}
-	public float getMinY() {
-		return minY;
-	}
-	public float getMaxY() {
-		return maxY;
-	}
-	public JwMoveMotion setSize(float minX,float minY,float maxX,float maxY) {
-		this.minX = minX;
-		this.minY = minY;
-		this.maxX = maxX;
-		this.maxY = maxY;
-		return this;
+
+	@Override
+	public void endScroll(View view, MotionSize size) {
+		magnet(view,300,size);
 	}
     
 }
