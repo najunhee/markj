@@ -1,8 +1,10 @@
 package com.markjmind.mobile.api.android.ui.drawgraph;
+import android.graphics.Color;
 
 
 public class SimpleStyle {
 	public int color;
+	public int backgroundColor;
 	public int width;
 	public int size;
 	public int margin;
@@ -18,6 +20,7 @@ public class SimpleStyle {
 		this.size = size;
 		this.margin = margin;
 		this.meansure=0;
+		this.backgroundColor = Color.parseColor("#00000000");
 	}
 	
 	public SimpleStyle(int color, int width, int size, int margin, Align align) {
@@ -27,6 +30,7 @@ public class SimpleStyle {
 		this.margin = margin;
 		this.meansure=0;
 		this.align = align;
+		this.backgroundColor = Color.parseColor("#00000000");
 	}
 
 	public int getColor() {
@@ -35,6 +39,15 @@ public class SimpleStyle {
 
 	public SimpleStyle setColor(int color) {
 		this.color = color;
+		return this;
+	}
+	
+	public int getBackgourndColor() {
+		return backgroundColor;
+	}
+
+	public SimpleStyle setBackgourndColor(int color) {
+		this.backgroundColor = backgroundColor;
 		return this;
 	}
 
