@@ -27,11 +27,14 @@ public class JwMoveMotion implements ScrollMotionListener{
 	
 	private void init(){
 		action = DIRECTION.ALL;
-		magnet = DIRECTION.ALL;
 		interpolator = new AccelerateDecelerateInterpolator();
 		result = true;
 	}
-	
+
+	@Override
+	public void startScroll(View view, MotionSize motionSize) {
+		
+	}
 	
 	public boolean scroll(View view, float x, float y, MotionSize size){
 		switch (action) {
@@ -67,6 +70,11 @@ public class JwMoveMotion implements ScrollMotionListener{
 		return result;
 	}
 	
+	@Override
+	public void endScroll(View view, MotionSize size) {
+		magnet(view,300,size);
+	}
+	
 	public JwMoveMotion setResult(boolean result){
 		this.result = result;
 		return this;
@@ -84,6 +92,7 @@ public class JwMoveMotion implements ScrollMotionListener{
 			// TODO X축이 0일때 처리
 		}else if(moving>=size.maxX){
 			view.setX(size.maxX);
+			// TODO X축이 Max일때 이벤트처리(이동이 끝남) 이벤트 처리
 		}else{
 			view.setX(moving);
 		}
@@ -93,9 +102,10 @@ public class JwMoveMotion implements ScrollMotionListener{
 		float moving = view.getY()+y;
 		if(moving<=size.minY){
 			view.setY(size.minY);
-			// TODO X축이 0일때 처리
+			// TODO Y축이 0일때 처리
 		}else if(moving>=size.maxY){
 			view.setY(size.maxY);
+			// TODO Y축이 Max일때 이벤트처리(이동이 끝남) 이벤트 처리
 		}else{
 			view.setY(moving);
 		}
@@ -132,32 +142,38 @@ public class JwMoveMotion implements ScrollMotionListener{
 		moveAnimY.setInterpolator(interpolator);
 		moveAnimX.setDuration(duration);
 		moveAnimY.setDuration(duration);
+		if(magnet==null){
+			magnet = action;
+		}
 		switch (magnet) {
 	      case ALL:
 	    	  animSet.play(moveAnimX).with(moveAnimY);
 	          break;
 	      case LEFT:
+	    	  moveAnimX.setFloatValues(currX,size.minX);
+	    	  animSet.play(moveAnimX);
 	          break;
 	      case RIGHT:
+	    	  moveAnimX.setFloatValues(currX,size.maxX);
+	    	  animSet.play(moveAnimX);
 	          break;
 	      case TOP:
+	    	  moveAnimY.setFloatValues(currY,size.minY);
+	    	  animSet.play(moveAnimY);
 	          break;
 	      case BOTTOM:
+	    	  moveAnimY.setFloatValues(currY,size.maxY);
+	    	  animSet.play(moveAnimY);
 	          break;
 	      case HORIZONTAL:
+	    	  animSet.play(moveAnimX);
 	          break;
 	      case VERTICALITY:
+	    	  animSet.play(moveAnimY);
 	          break;
 	      case NONE:
 	          return;
 	    }
 		animSet.start();
 	}
-	
-
-	@Override
-	public void endScroll(View view, MotionSize size) {
-		magnet(view,300,size);
-	}
-    
 }

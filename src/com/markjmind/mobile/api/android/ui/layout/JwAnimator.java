@@ -9,32 +9,20 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 
 @SuppressLint({ "NewApi", "ClickableViewAccessibility" })
-public class JwMotion extends SimpleOnGestureListener{
-	public interface ScrollMotionListener{
-		public void startScroll(View view, MotionSize motionSize);
-		public boolean scroll(View view, float x, float y, MotionSize motionSize);
-		public void endScroll(View view, MotionSize motionSize);
-	}
-	public interface FlingMotionListener{
-		public boolean fling(float distanceX, float distanceY,float velocityX, float velocityY);
-	}
-	
+public class JwAnimator extends SimpleOnGestureListener{
 	/**
 	 * 이동되는 타겟뷰
 	 */
 	private View view;
 	private GestureDetector gestureDetector;
+	private JwMotionAdapter adapter;
+	
 	public static enum ACTION{
 		NONE,SCROLL,FLING
 	}
 	private ACTION currAction=ACTION.NONE;
-	
-	
-	
-	private ScrollMotionListener scrollMotionListener;
 	private boolean isFirstMove = false;
 	private float tempRawX=0f,tempRawY=0f;
-	private FlingMotionListener flingMotionListener;
 	
 	private MotionSize size;
 	public static enum TAGET{
@@ -52,7 +40,7 @@ public class JwMotion extends SimpleOnGestureListener{
 		VERTICALITY
 	}
 	
-	public JwMotion(View view){
+	public JwAnimator(View view){
 		this.view = view;
 		init();
 	} 
@@ -69,24 +57,14 @@ public class JwMotion extends SimpleOnGestureListener{
 		});
 	}
 	
-	public JwMotion setSize(MotionSize size){
+	public JwAnimator setSize(MotionSize size){
 		this.size = size;
 		return this;
 	}
-	public JwMotion setSize(float minX,float minY,float maxX,float maxY) {
+	public JwAnimator setSize(float minX,float minY,float maxX,float maxY) {
 		this.size = new MotionSize(minX, maxX, minY, maxY);
 		return this;
 	}
-	
-	public JwMotion setScrollMotionListener(ScrollMotionListener motion){
-		this.scrollMotionListener = motion;
-		return this;
-	}
-	public JwMotion setFlingMotionListener(FlingMotionListener flingMotionListener){
-		this.flingMotionListener = flingMotionListener;
-		return this;
-	}
-	  
 	
 	public GestureDetector getGestureDetector(){
 		if(gestureDetector==null){
@@ -131,10 +109,10 @@ public class JwMotion extends SimpleOnGestureListener{
 		return otl;
 	}
 	private void endingMotion(){
+		//TODO 모션이 끝날때 처리
 		switch(currAction){
 			case SCROLL: {
-				if(scrollMotionListener!=null)
-					scrollMotionListener.endScroll(view,size);
+				
 				break;
 			}
 			case FLING: {
@@ -187,17 +165,14 @@ public class JwMotion extends SimpleOnGestureListener{
     @Override
      public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
     	currAction = ACTION.SCROLL;
-    	if(scrollMotionListener!=null){
-    		if(!isFirstMove){
-    			float x = e2.getRawX()-tempRawX;
-    			float y = e2.getRawY()-tempRawY;
-    			scrollMotionListener.scroll(view, x, y,size);
-    		}else{
-    			scrollMotionListener.startScroll(view, size);
-    		}
-    		tempRawX = e2.getRawX();
-			tempRawY = e2.getRawY();
-    	}
+		if(!isFirstMove){
+			float x = e2.getRawX()-tempRawX;
+			float y = e2.getRawY()-tempRawY;
+		}else{
+			//TODO startScroll 처리
+		}
+		tempRawX = e2.getRawX();
+		tempRawY = e2.getRawY();
     	isFirstMove = false;
         return true;
      }
@@ -207,9 +182,9 @@ public class JwMotion extends SimpleOnGestureListener{
     	currAction = ACTION.FLING;
     	float distanceX = e2.getX()-e1.getX();
 		float distanceY = e2.getY()-e1.getY();
-		if(flingMotionListener!=null){
-			flingMotionListener.fling(distanceX, distanceY, velocityX, velocityY);
-		}
+//		if(flingMotionListener!=null){
+//			flingMotionListener.fling(distanceX, distanceY, velocityX, velocityY);
+//		}
         return true;
     }
 }
