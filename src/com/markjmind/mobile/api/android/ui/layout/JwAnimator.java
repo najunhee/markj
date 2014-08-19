@@ -1,21 +1,24 @@
 package com.markjmind.mobile.api.android.ui.layout;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 
 @SuppressLint({ "NewApi", "ClickableViewAccessibility" })
 public class JwAnimator extends SimpleOnGestureListener{
 	/**
 	 * 이동되는 타겟뷰
 	 */
-	private View view;
+//	private View view;
 	private GestureDetector gestureDetector;
-	private JwMotionAdapter adapter;
+	private JwMotionSet motionSet;
+	private Context context;
 	
 	public static enum ACTION{
 		NONE,SCROLL,FLING
@@ -40,21 +43,31 @@ public class JwAnimator extends SimpleOnGestureListener{
 		VERTICALITY
 	}
 	
-	public JwAnimator(View view){
-		this.view = view;
+	public JwAnimator(Context context){
+		this.context = context;
+//		this.view = view;
 		init();
 	} 
 	
 	private void init(){
-		view.post(new Runnable() {
-			@Override
-			public void run() {
-				if(size==null){
-					ViewGroup parents = (ViewGroup)view.getParent();
-					setSize(0,0,parents.getWidth()-view.getWidth(),parents.getHeight()-view.getHeight());
-				}
-			}
-		});
+//		view.post(new Runnable() {
+//			@Override
+//			public void run() {
+//				if(size==null){
+//					ViewGroup parents = (ViewGroup)view.getParent();
+//					setSize(0,0,parents.getWidth()-view.getWidth(),parents.getHeight()-view.getHeight());
+//				}
+//			}
+//		});
+		motionSet = new JwMotionSet();
+	}
+	
+	public MotionBuilder play(View targetView, ValueAnimator valueAnimator, DIRECTION direction){
+		return motionSet.play(targetView, valueAnimator, direction);
+	}
+	
+	public MotionBuilder play(ObjectAnimator objectAnimator, DIRECTION direction){
+		return motionSet.play(objectAnimator, direction);
 	}
 	
 	public JwAnimator setSize(MotionSize size){
@@ -68,7 +81,7 @@ public class JwAnimator extends SimpleOnGestureListener{
 	
 	public GestureDetector getGestureDetector(){
 		if(gestureDetector==null){
-			gestureDetector = new GestureDetector(view.getContext(), this);
+			gestureDetector = new GestureDetector(context, this);
 		}
 		gestureDetector.setIsLongpressEnabled(false);
 		return gestureDetector;
@@ -168,6 +181,10 @@ public class JwAnimator extends SimpleOnGestureListener{
 		if(!isFirstMove){
 			float x = e2.getRawX()-tempRawX;
 			float y = e2.getRawY()-tempRawY;
+			for(int i=0;i<motionSet.adapterList.size();i++){
+				JwMotionAdapter adt = motionSet.adapterList.get(i);
+				adt.scroll(adt.getTargetView(), x, y, size);
+			}
 		}else{
 			//TODO startScroll 처리
 		}

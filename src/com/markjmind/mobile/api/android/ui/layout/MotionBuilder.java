@@ -1,8 +1,9 @@
 package com.markjmind.mobile.api.android.ui.layout;
 
-import java.util.ArrayList;
-
-import javax.xml.datatype.Duration;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
+import android.view.View;
 
 /**
  * 
@@ -11,28 +12,46 @@ import javax.xml.datatype.Duration;
  * @email markjmind@gmail.com
  * @date 2014. 8. 13.
  */
+@SuppressLint("NewApi") 
 public class MotionBuilder {
-	
-	public ArrayList<JwMotionAdapter> adapterList = new ArrayList<JwMotionAdapter>();
+	private JwMotionSet set;
 	private JwMotionAdapter currAdapter;
 	
-	public MotionBuilder(JwMotionAdapter playAdapter){
-		adapterList.clear();
-		this.currAdapter = playAdapter;
-		adapterList.add(playAdapter);
+	public MotionBuilder(JwMotionSet set, JwMotionAdapter playAdapter){
+		this.set = set;
+		set.adapterList.clear();
+		currAdapter = playAdapter;
+		set.maxDuration = playAdapter.startDuration+playAdapter.duration;
+		set.adapterList.add(playAdapter);
 	}
 	
-	public MotionBuilder with(JwMotionAdapter adapter){
+	public MotionBuilder with(View targetView, ValueAnimator valueAnimator){
+		JwMotionAdapter adapter = new JwMotionAdapter(targetView,valueAnimator,set.direction);
 		adapter.joinDuration = currAdapter.joinDuration;
-		this.currAdapter = adapter;
-		adapterList.add(currAdapter);
+		currAdapter = adapter;
+		if(set.maxDuration<adapter.startDuration+adapter.duration){
+			set.maxDuration = adapter.startDuration+adapter.duration;
+		}
+		set.adapterList.add(currAdapter);
+		return this;
+	}
+	public MotionBuilder with(ObjectAnimator objectAnimator){
+		View targetView = (View)objectAnimator.getTarget();
+		return with(targetView, objectAnimator);
+	}
+	
+	public MotionBuilder after(View targetView, ValueAnimator valueAnimator){
+		JwMotionAdapter adapter = new JwMotionAdapter(targetView,valueAnimator,set.direction);
+		adapter.joinDuration = set.maxDuration;
+		currAdapter = adapter;
+		set.maxDuration += adapter.startDuration+adapter.duration;
+		set.adapterList.add(currAdapter);
 		return this;
 	}
 	
-	public MotionBuilder after(JwMotionAdapter adapter){
-		adapter.joinDuration = currAdapter.joinDuration+adapter.duration;
-		this.currAdapter = adapter;
-		adapterList.add(currAdapter);
-		return this;
+	public MotionBuilder after(ObjectAnimator objectAnimator){
+		View targetView = (View)objectAnimator.getTarget();
+		return after(targetView, objectAnimator);
 	}
+	
 }
