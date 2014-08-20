@@ -21,7 +21,7 @@ public class MotionBuilder {
 		this.set = set;
 		set.adapterList.clear();
 		currAdapter = playAdapter;
-		set.maxDuration = playAdapter.startDuration+playAdapter.duration;
+		set.maxDuration = playAdapter.startDuration+playAdapter.playDuration;
 		set.adapterList.add(playAdapter);
 	}
 	
@@ -29,8 +29,8 @@ public class MotionBuilder {
 		JwMotionAdapter adapter = new JwMotionAdapter(targetView,valueAnimator,set.direction);
 		adapter.joinDuration = currAdapter.joinDuration;
 		currAdapter = adapter;
-		if(set.maxDuration<adapter.startDuration+adapter.duration){
-			set.maxDuration = adapter.startDuration+adapter.duration;
+		if(set.maxDuration<adapter.joinDuration+adapter.startDuration+adapter.playDuration){
+			set.maxDuration = adapter.joinDuration+adapter.startDuration+adapter.playDuration;
 		}
 		set.adapterList.add(currAdapter);
 		return this;
@@ -44,7 +44,7 @@ public class MotionBuilder {
 		JwMotionAdapter adapter = new JwMotionAdapter(targetView,valueAnimator,set.direction);
 		adapter.joinDuration = set.maxDuration;
 		currAdapter = adapter;
-		set.maxDuration += adapter.startDuration+adapter.duration;
+		set.maxDuration += adapter.startDuration+adapter.playDuration;
 		set.adapterList.add(currAdapter);
 		return this;
 	}

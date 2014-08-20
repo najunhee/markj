@@ -4,7 +4,6 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.view.View;
 
-import com.markjmind.mobile.api.android.ui.layout.JwAnimator.DIRECTION;
 import com.markjmind.mobile.api.android.ui.layout.JwMotion.FlingMotionListener;
 import com.markjmind.mobile.api.android.ui.layout.JwMotion.ScrollMotionListener;
 
@@ -12,21 +11,28 @@ import com.markjmind.mobile.api.android.ui.layout.JwMotion.ScrollMotionListener;
 public class JwMotionAdapter implements ScrollMotionListener,FlingMotionListener{
 	long joinDuration = 0;
 	long startDuration = 0;
-	long duration = 0;
+	// TODO TOUCH와 똑같이 VIEW가 움직이려면 화면 크게에 맞게 duration이 변경되어야해서
+	// 실제 play 되는 Duration과 사용자가 지정한 Duration이 다를수 있는데 이부분에 대한 해결책을 생각해야함
+	long playDuration = 0;
 
-	private DIRECTION direction;
+
+	private int direction;
 	private ValueAnimator anim;
 	private float currX=0f,currY=0f;
 	private View tagerView;
 	
-	public JwMotionAdapter(View tagerView, ValueAnimator anim, DIRECTION direction){
+	private float accelerator;
+	
+	public JwMotionAdapter(View tagerView, ValueAnimator anim, int direction){
 		this.tagerView = tagerView;
 		this.anim = anim;
 		this.direction = direction;
 		
 		this.joinDuration = 0;
 		this.startDuration = anim.getStartDelay();
-		this.duration = anim.getDuration();
+		this.playDuration = anim.getDuration();
+		
+		this.accelerator = 1.0f;
 	}
 	@Override
 	public boolean fling(float distanceX, float distanceY, float velocityX, float velocityY) {
@@ -38,28 +44,55 @@ public class JwMotionAdapter implements ScrollMotionListener,FlingMotionListener
 		currX=0f;
 		currY=0f;
 	}
-
 	@Override
 	public boolean scroll(View view, float x, float y, MotionSize motionSize) {
-		currX+=x;
-		currY+=y;
+		if(direction== JwAnimator.LEFT){
+			currX-=x*accelerator;
+		}else{
+			currX+=x*accelerator;
+		}
+		if(direction== JwAnimator.TOP){
+			currY-=y*accelerator;
+		}else{
+			currY+=y*accelerator;
+		}
+		// TODO currMaxDuration을 전역변수로 빼서 연산 줄이기
+		long currMaxDuration = playDuration-joinDuration-startDuration;
+		long currDurationX = (long)(currX-joinDuration-startDuration);
+		long currDurationY = (long)(currY-joinDuration-startDuration);
+		
+		if(currDurationX<0){
+			currDurationX = 0;
+		}
+		if(currDurationX>currMaxDuration){
+			currDurationX = currMaxDuration; 
+		}
+		if(currDurationY<0){
+			currDurationY = 0;
+		}
+		if(currDurationY>currMaxDuration){
+			currDurationY = currMaxDuration; 
+		}
+		
+				
 		switch(direction){
-			case ALL:{
+			case JwAnimator.ALL:{
 				break;
-			}case LEFT:{
+			}case JwAnimator.LEFT:{
 				break;
-			}case RIGHT:{
-				anim.setCurrentPlayTime((long)currX);
+			}case JwAnimator.RIGHT:{
+				anim.setCurrentPlayTime(currDurationX);
 				break;
-			}case TOP:{
+			}case JwAnimator.TOP:{
 				break;
-			}case BOTTOM:{
+			}case JwAnimator.BOTTOM:{
+				anim.setCurrentPlayTime(currDurationY);
 				break;
-			}case HORIZONTAL:{
+			}case JwAnimator.HORIZONTAL:{
 				break;
-			}case VERTICALITY:{
+			}case JwAnimator.VERTICALITY:{
 				break;
-			}case NONE:{
+			}case JwAnimator.NONE:{
 				return false;
 			}
 		}
@@ -78,4 +111,11 @@ public class JwMotionAdapter implements ScrollMotionListener,FlingMotionListener
 		return tagerView;
 	}
 
+	public void setAccelerator(float accelerator){
+		this.accelerator = accelerator;
+	}
+	
+	public float getAccelerator(){
+		return accelerator;
+	}
 }

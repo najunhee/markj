@@ -31,17 +31,15 @@ public class JwAnimator extends SimpleOnGestureListener{
 	public static enum TAGET{
 		SELF,PARENTS
 	}
-		
-	public static enum DIRECTION{
-		NONE,
-		ALL,
-		LEFT,
-		RIGHT,
-		TOP,
-		BOTTOM,
-		HORIZONTAL,
-		VERTICALITY
-	}
+	
+	public final static int NONE = 0x00000001;
+	public final static int LEFT = 0x00000002;
+	public final static int RIGHT = 0x00000004;
+	public final static int TOP = 0x0000008;
+	public final static int BOTTOM = 0x00000010;
+	public final static int HORIZONTAL = LEFT|RIGHT;
+	public final static int VERTICALITY = TOP|BOTTOM;
+	public final static int ALL = HORIZONTAL|VERTICALITY;
 	
 	public JwAnimator(Context context){
 		this.context = context;
@@ -62,11 +60,11 @@ public class JwAnimator extends SimpleOnGestureListener{
 		motionSet = new JwMotionSet();
 	}
 	
-	public MotionBuilder play(View targetView, ValueAnimator valueAnimator, DIRECTION direction){
+	public MotionBuilder play(View targetView, ValueAnimator valueAnimator, int direction){
 		return motionSet.play(targetView, valueAnimator, direction);
 	}
 	
-	public MotionBuilder play(ObjectAnimator objectAnimator, DIRECTION direction){
+	public MotionBuilder play(ObjectAnimator objectAnimator, int direction){
 		return motionSet.play(objectAnimator, direction);
 	}
 	
