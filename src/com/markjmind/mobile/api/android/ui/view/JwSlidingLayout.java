@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
@@ -120,7 +119,7 @@ public class JwSlidingLayout extends LinearLayout{
 	
 	public JwSlidingLayout show(){
 		if(!isPost){
-			aniMove(100*-1);
+			aniMove(100*-1,true);
 		}else{
 			isOpened=true;
 		}
@@ -128,7 +127,7 @@ public class JwSlidingLayout extends LinearLayout{
 	}
 	public JwSlidingLayout hide(){
 		if(!isPost){
-			aniMove(100);
+			aniMove(100,true);
 		}else{
 			isOpened=false;
 		}
@@ -200,7 +199,7 @@ public class JwSlidingLayout extends LinearLayout{
 	
 	
 	
-	private void aniMove(float velocity){
+	private void aniMove(float velocity,boolean isAccel){
 		if(position==Position.RIGHT || position==Position.BOTTOM ){
 			velocity = velocity*-1;
 		}
@@ -210,17 +209,22 @@ public class JwSlidingLayout extends LinearLayout{
 		}else{
 			go =1;
 		}
-		
-		vel = Math.abs((int)(velocity/100));
-		if(vel>300){
-			vel = 200;
+		vel = Math.abs((int)(velocity/100/density));
+		if(vel>100*density){
+			vel = (int)(100*density);
 		}
-		if(vel < 50){
-			vel = 50;
+		if(vel < 15*density*1.5f){
+			vel = (int)(10*density*1.5f);
 		}
+		final boolean accel = isAccel;
 		new Thread(new Runnable() {
+			int accelVel = 0;
+			
 			@Override
 			public void run() {
+				if(!accel){
+					accelVel=(int)(vel/density);
+				}
 				while(isFling){
 					try {
 						Thread.sleep(10);
@@ -230,7 +234,12 @@ public class JwSlidingLayout extends LinearLayout{
 					anim.post(new Runnable() {
 						@Override
 						public void run() {
-							move(vel*go);
+							if(accelVel<=vel){
+								accelVel++;
+								move(accelVel*go);
+							}else{
+								move(vel*go);
+							}
 							if(curr_value>=maxSize || curr_value<=0){
 								isFling = false;
 							}
@@ -254,6 +263,20 @@ public class JwSlidingLayout extends LinearLayout{
 	
 	class SimpleOnGesture extends SimpleOnGestureListener{
 		@Override
+		public boolean onSingleTapUp(MotionEvent e) {
+			isDrag = false;
+			int go=1;
+			if(isOpened){
+				go=go*-1;
+			}
+			if(position==Position.RIGHT || position==Position.BOTTOM){
+				go=go*-1;
+			}
+			aniMove(30*go,true);
+			isFling=true;
+			return false;
+		}
+		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,float velocityY) {
 			if(isFling){
 				return false;
@@ -268,14 +291,14 @@ public class JwSlidingLayout extends LinearLayout{
 //				Log.d("onFling","가로 velocityX:"+velocityX+" ,x:"+x+"("+(Math.abs(x)>=Math.abs(y))+")");
 				isDrag = false;
 				isFling = true;
-				aniMove(x);
+				aniMove(x,false);
 			}else if((position==Position.TOP || position==Position.BOTTOM)){
 				if(Math.abs(y)<0.3f){
 					return false;
 				}
 				isDrag = false;
 				isFling = true;
-				aniMove(y);
+				aniMove(y,false);
 			}else{
 				return false; 
 			}
@@ -324,7 +347,7 @@ public class JwSlidingLayout extends LinearLayout{
 		    				if(position==Position.RIGHT || position==Position.BOTTOM){
 		    					go=go*-1;
 		    				}
-							aniMove(100*go);
+							aniMove(100*go,true);
 							return true;
 			    		}
 			    		isDrag = false;

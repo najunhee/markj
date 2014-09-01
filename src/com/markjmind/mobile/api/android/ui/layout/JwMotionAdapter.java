@@ -47,14 +47,14 @@ public class JwMotionAdapter implements ScrollMotionListener,FlingMotionListener
 	@Override
 	public boolean scroll(View view, float x, float y, MotionSize motionSize) {
 		if(direction== JwAnimator.LEFT){
-			currX-=x*accelerator;
+			currX-=x*accelerator/view.getResources().getDisplayMetrics().density;
 		}else{
-			currX+=x*accelerator;
+			currX+=x*accelerator/view.getResources().getDisplayMetrics().density;
 		}
 		if(direction== JwAnimator.TOP){
-			currY-=y*accelerator;
+			currY-=y*accelerator/view.getResources().getDisplayMetrics().density;
 		}else{
-			currY+=y*accelerator;
+			currY+=y*accelerator/view.getResources().getDisplayMetrics().density;
 		}
 		// TODO currMaxDuration을 전역변수로 빼서 연산 줄이기
 		long currMaxDuration = playDuration-joinDuration-startDuration;
