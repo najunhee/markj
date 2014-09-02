@@ -21,7 +21,4 @@ public class JwMotionSet {
 		builder = new MotionBuilder(this, adapter);
 		return builder;
 	}
-	public MotionBuilder play(ObjectAnimator objectAnimator, int direction){
-		return this.play((View)objectAnimator.getTarget(), objectAnimator, direction);
-	}
 }
