@@ -119,7 +119,7 @@ public class JwSlidingLayout extends LinearLayout{
 	
 	public JwSlidingLayout show(){
 		if(!isPost){
-			aniMove(100*-1,true);
+			aniMove(200*-1,true);
 		}else{
 			isOpened=true;
 		}
@@ -127,7 +127,7 @@ public class JwSlidingLayout extends LinearLayout{
 	}
 	public JwSlidingLayout hide(){
 		if(!isPost){
-			aniMove(100,true);
+			aniMove(200,true);
 		}else{
 			isOpened=false;
 		}
@@ -272,7 +272,7 @@ public class JwSlidingLayout extends LinearLayout{
 			if(position==Position.RIGHT || position==Position.BOTTOM){
 				go=go*-1;
 			}
-			aniMove(30*go,true);
+			aniMove(100*go,true);
 			isFling=true;
 			return false;
 		}
@@ -347,7 +347,7 @@ public class JwSlidingLayout extends LinearLayout{
 		    				if(position==Position.RIGHT || position==Position.BOTTOM){
 		    					go=go*-1;
 		    				}
-							aniMove(100*go,true);
+							aniMove(200*go,true);
 							return true;
 			    		}
 			    		isDrag = false;
