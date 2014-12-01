@@ -15,7 +15,7 @@ import android.widget.TextView;
  * 비동기 Layout Controll인 JwViewController를 확장한 클래스이다.<br>
  * Layout에 관련된 Util을 추가확장 했다.<br>
  * 
- * @author 오재웅
+ * @author 오재웅      
  * @version 2013.11.17
  */
 public class Jwc extends JwViewController{ 
