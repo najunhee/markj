@@ -378,10 +378,11 @@ public class JwViewer {
 					//캐쉬에 저장
 					JwViewerCache.put(this);
 				}else{
-					Log.e("뷰어", "캐쉬돈 뷰어 사용");
+					Log.e("뷰어", "캐쉬된 뷰어 사용");
 					viewer = jv.getView();
+					frame = jv.frame;
+					frame.removeAllViews();
 				}
-				
 			}else{
 				viewer = (ViewGroup)getLayoutInfalter(layoutId);
 				Log.e("뷰어", "노캐쉬!");
