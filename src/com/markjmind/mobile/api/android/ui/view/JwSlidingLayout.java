@@ -118,16 +118,30 @@ public class JwSlidingLayout extends LinearLayout{
 	}
 	
 	public JwSlidingLayout show(){
-		if(!isPost){
-			aniMove(200*-1,true);
+		if(!isPost && !isOpened){
+			if(!isFling && !isDrag){
+				int go=1;
+				if(position==Position.RIGHT || position==Position.BOTTOM){
+					go=go*-1;
+				}
+				isFling=true;
+				aniMove(100*go,true);
+			}
 		}else{
 			isOpened=true;
 		}
 		return this;
 	}
 	public JwSlidingLayout hide(){
-		if(!isPost){
-			aniMove(200,true);
+		if(!isPost && isOpened ){
+			if(!isFling && !isDrag){
+				int go=-1;
+				if(position==Position.RIGHT || position==Position.BOTTOM){
+					go=go*-1;
+				}
+				isFling=true;
+				aniMove(100*go,true);
+			}
 		}else{
 			isOpened=false;
 		}
@@ -198,8 +212,7 @@ public class JwSlidingLayout extends LinearLayout{
 	}
 	
 	
-	
-	private void aniMove(float velocity,boolean isAccel){
+	public void aniMove(float velocity,boolean isAccel){
 		if(position==Position.RIGHT || position==Position.BOTTOM ){
 			velocity = velocity*-1;
 		}
@@ -247,6 +260,7 @@ public class JwSlidingLayout extends LinearLayout{
 					});
 					
 				}
+				isDrag = false;
 			}
 		}).start();
 	}
@@ -272,8 +286,8 @@ public class JwSlidingLayout extends LinearLayout{
 			if(position==Position.RIGHT || position==Position.BOTTOM){
 				go=go*-1;
 			}
-			aniMove(100*go,true);
 			isFling=true;
+			aniMove(100*go,true);
 			return false;
 		}
 		@Override
@@ -339,7 +353,6 @@ public class JwSlidingLayout extends LinearLayout{
 						break;
 			    	case MotionEvent.ACTION_UP:
 			    		if(isDrag && !isFling){
-			    			isFling=true;
 			    			int go=1;
 		    				if(curr_value==0 ||maxSize/2<Math.abs(curr_value)){
 		    					go = -1;
@@ -347,6 +360,7 @@ public class JwSlidingLayout extends LinearLayout{
 		    				if(position==Position.RIGHT || position==Position.BOTTOM){
 		    					go=go*-1;
 		    				}
+		    				isFling=true;
 							aniMove(200*go,true);
 							return true;
 			    		}
