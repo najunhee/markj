@@ -37,12 +37,29 @@ public class JwMemberMapper {
 	{
 		int value();
 	}
+	
+	@Retention( RetentionPolicy.RUNTIME )
+	@Target(ElementType.TYPE)
+	public @interface box
+	{
+		String[] value();
+	}
+	
+	public static String[] injectionBox(Class<?> viewerClass){
+		if(viewerClass.isAnnotationPresent(box.class)){
+			box par = viewerClass.getAnnotation(box.class);
+			return par.value();
+		}else{
+			throw new JwMapperException("\n["+viewerClass.getName()+"] 해당 Viewer에 @params을 지정하는 annotation의 value가 잘못되었습니다..",null);
+		}
+	}
+	
 	public static int injectionLayout(Class<?> viewerClass){
 		if(viewerClass.isAnnotationPresent(layout.class)){
 			layout lytId = viewerClass.getAnnotation(layout.class);
 			return lytId.value();
 		}else{
-			throw new JwMapperException("\n["+viewerClass.getName()+"] 해당 Viewer에 layout을 지정하는 annotation이 없습니다.",null);
+			throw new JwMapperException("\n["+viewerClass.getName()+"] 해당 Viewer에 @layout을 지정하는 annotation의 value가 잘못되었습니다.",null);
 		}
 		
 	}

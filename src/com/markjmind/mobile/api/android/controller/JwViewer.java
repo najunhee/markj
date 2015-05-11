@@ -12,9 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -213,7 +211,6 @@ public class JwViewer {
 		return viewerParam.get(key);
 	}
 	
-	
 	/**
 	 * 다른 Viewer로 전달한 파라미터를 받는다.<br>
 	 * key에 대응하는 value가 없으면 defalut값을 리턴한다.
@@ -325,6 +322,10 @@ public class JwViewer {
 	 */
 	public Store<Object> getLoadParamStore(){
 		return loadingParam;
+	}
+	
+	public static String[] getBox(Class<?> viewerClass){
+		return JwMemberMapper.injectionBox(viewerClass);
 	}
 	
 	/**
@@ -639,23 +640,40 @@ public class JwViewer {
 	 * @return
 	 */
 	private JwViewer add(ViewGroup parents, int index){
-		JwViewer jv = getViewer(getLayoutId(),jwViewerClass);
-		jv.parentView = parents;
-		jv.setAsync(this.async);
-		jv.setParamStore(viewerParam);
-		jv.setAnimation(this.inAnimation, this.outAnimation, this.outEndAnimate);
-		if(jv.async){
-			jv.excute(TASK_APUT);
+//		JwViewer jv = getViewer(getLayoutId(),jwViewerClass);
+//		jv.parentView = parents;
+//		jv.setAsync(this.async);
+//		jv.setParamStore(viewerParam);
+//		jv.setAnimation(this.inAnimation, this.outAnimation, this.outEndAnimate);
+//		if(jv.async){
+//			jv.excute(TASK_APUT);
+//		}else{
+//			jv.viewerInit(true);
+//			jv.frame.addView(jv.viewer,jv.parentView.getLayoutParams());
+//			if(index==-1){
+//				jv.parentView.addView(jv.frame);
+//			}else{
+//				jv.parentView.addView(jv.frame,index);
+//			}
+//			jv.view_init();
+//		}
+//		return this;
+		
+		parentView = parents;
+		if(async){
+			excute(TASK_APUT);
 		}else{
-			jv.viewerInit(true);
-			jv.frame.addView(jv.viewer,jv.parentView.getLayoutParams());
+			cancelTaskAcv();
+			viewerInit(true);
+			frame.addView(viewer,parentView.getLayoutParams());
 			if(index==-1){
-				jv.parentView.addView(jv.frame);
+				parentView.addView(frame, parentView.getLayoutParams());
 			}else{
-				jv.parentView.addView(jv.frame,index);
+				parentView.addView(frame, index, parentView.getLayoutParams());
 			}
-			jv.view_init();
+			view_init();
 		}
+		ableRefresh = true;
 		return this;
 	}
 	private View getLayoutInfalter(int layout_id){
@@ -893,7 +911,8 @@ public class JwViewer {
 		}
 		jv.viewerInit(true);
 		if(viewerIndex>=0){
-			jv.frame.addView(jv.viewer,viewerIndex,jv.parentView.getLayoutParams());
+//			jv.frame.addView(jv.viewer,viewerIndex,jv.parentView.getLayoutParams());
+			jv.frame.addView(jv.viewer,jv.parentView.getLayoutParams());
 		}else{
 			jv.frame.addView(jv.viewer,jv.parentView.getLayoutParams());
 		}
