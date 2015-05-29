@@ -74,7 +74,10 @@ public class JwViewer {
 	protected JwViewer(){
 		viewerParam = new Store<Object>();
 	}
-	
+
+	private boolean inner_loading(){
+		return loading();
+	}
 	/**
 	 * 네트워크등 Thread 처리 관련 내용을 정의한다.
 	 * @return
@@ -83,6 +86,18 @@ public class JwViewer {
 		return true;
 	}
 	
+	private boolean inner_view_init(){
+		if(getParent()==null){
+			return false;
+		}
+		//FIXME hashCode가 구조상 유일 아이디가 될수 있는지 확인
+		int hashId = frame.hashCode();
+		frame.setId(hashId);
+		if(getViewToContext(hashId)!=null){
+			view_init();
+		}
+		return true;
+	}
 	/**
 	 * loading() 리턴값이 true 일때 호출된다.<br>
 	 * Viewer를 재정의해야할 함수<br>
@@ -91,7 +106,9 @@ public class JwViewer {
 	public void view_init(){
 		
 	}
-	
+	private void inner_view_fail(){
+		view_fail();
+	}
 	/**
 	 * loading() 리턴값이 false일때 호출된다.<br>
 	 * 로딩이 실패했을 경우 표현해야할 화면을 정의한다.
@@ -671,7 +688,7 @@ public class JwViewer {
 			}else{
 				parentView.addView(frame, index, parentView.getLayoutParams());
 			}
-			view_init();
+			inner_view_init();
 		}
 		ableRefresh = true;
 		return this;
@@ -719,7 +736,7 @@ public class JwViewer {
 			frame.addView(viewer,parentView.getLayoutParams());
 			parentView.addView(frame,parentView.getLayoutParams());
 			if(!cache){
-				view_init();
+				inner_view_init();
 			}
 		}
 		ableRefresh = true;
@@ -875,7 +892,7 @@ public class JwViewer {
 		protected Object doInBackground(Object... params) {
 			loadingParam = new Store<Object>();
 			loadingParam.clear();
-			return loading(); //데이터 가져오기
+			return inner_loading(); //데이터 가져오기
 		}
 		@Override
 		protected void onPostExecute(Object result) {
@@ -884,16 +901,20 @@ public class JwViewer {
 			}
 			boolean isView = (Boolean)result;
 			if(isView){
-				viewerBind(jv, task);
-				view_init();
+				if(viewerBind(jv, task)){
+					inner_view_init();
+				}
 			}else{
-				view_fail();
+				inner_view_fail();
 			}
 			asyncTaskPool.remove(taskKey);
 		}
 	}
 	
-	private synchronized static void viewerBind(JwViewer jv, String task){
+	private synchronized static boolean viewerBind(JwViewer jv, String task){
+		if(jv.getParent()==null){
+			return false;
+		}
 		ViewGroup parentView = jv.getParent();
 		int viewerIndex = -1;
 		if(TASK_ACV.equals(task)){
@@ -916,6 +937,7 @@ public class JwViewer {
 		}else{
 			jv.frame.addView(jv.viewer,jv.parentView.getLayoutParams());
 		}
+		return true;
 		
 	}
 	
