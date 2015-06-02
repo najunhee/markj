@@ -87,7 +87,7 @@ public class JwViewer {
 	}
 	
 	private boolean inner_view_init(){
-		if(getParent()==null){
+		if(getParent()==null || frame==null){
 			return false;
 		}
 		//FIXME hashCode가 구조상 유일 아이디가 될수 있는지 확인
@@ -96,6 +96,8 @@ public class JwViewer {
 		if(getViewToContext(hashId)!=null){
 			view_init();
 		}
+		frame.setId(-1);
+		
 		return true;
 	}
 	/**
