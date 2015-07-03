@@ -684,11 +684,11 @@ public class JwViewer {
 		}else{
 			cancelTaskAcv();
 			viewerInit(true);
-			frame.addView(viewer,parentView.getLayoutParams());
+			frame.addView(viewer);
 			if(index==-1){
-				parentView.addView(frame, parentView.getLayoutParams());
+				parentView.addView(frame);
 			}else{
-				parentView.addView(frame, index, parentView.getLayoutParams());
+				parentView.addView(frame, index);
 			}
 			inner_view_init();
 		}
