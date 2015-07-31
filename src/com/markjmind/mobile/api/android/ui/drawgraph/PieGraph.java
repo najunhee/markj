@@ -63,6 +63,10 @@ public class PieGraph extends View{
 		
 	}
 	
+	private float percent = 1.0f;
+	public void setDrawPercent(float percent){
+		this.percent = percent;
+	}
 	
 	private void drawCircle(Canvas canvas){
 		Pnt.setStrokeWidth(mRadius);	
@@ -87,10 +91,20 @@ public class PieGraph extends View{
 		RectF rect=new RectF(stW,stH,w,h);
 		int pre_a = -90;
 		
+		int maxAngle = (int)(360*percent)+pre_a;
+		
 		for(int i=0;i<pieInfo.size();i++){
 			Pnt.setColor(pieInfo.get(i).color);
-			canvas.drawArc(rect,pre_a,pieInfo.get(i).angle,false,Pnt);
-			pre_a = pre_a+pieInfo.get(i).angle;
+			int drawAngle = pieInfo.get(i).angle;
+			if(pre_a+pieInfo.get(i).angle>maxAngle){
+				drawAngle = maxAngle-pre_a;
+			}
+			if(drawAngle<=0){
+				break;
+			}
+			canvas.drawArc(rect,pre_a,drawAngle,false,Pnt);
+			pre_a = pre_a+drawAngle;
+			
 		}
 	}
 	

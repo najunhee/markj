@@ -28,7 +28,8 @@ public class RectGraphSkin extends GraphSkin{
 			
 			int x = getWidth()*i/list.size()+getWidth()/list.size()/2;
 			int y = height*(getMaxMeasure()-style.meansure)/getMaxMeasure()+getTopMargin();
-			canvas.drawLine(x,y,x,height+getTopMargin(),Pnt);
+			int p = (int)((height+getTopMargin()-y)*(1f-percent));
+			canvas.drawLine(x,y+p,x,height+getTopMargin(),Pnt);
 		}
 	}
 	

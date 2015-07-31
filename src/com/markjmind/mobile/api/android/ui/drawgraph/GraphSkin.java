@@ -74,5 +74,8 @@ public abstract class GraphSkin {
 		return 0;
 	}
 	
-	
+	protected float percent = 1.0f;
+	public void setDrawPercent(float percent){
+		this.percent = percent;
+	}
 }

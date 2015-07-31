@@ -81,12 +81,18 @@ public class GraphBoard extends View{
 		maxBottomMargin = bottomMargin;
 	}
 	
+	private float percent = 1.0f;
+	public void setDrawPercent(float percent){
+		this.percent = percent;
+	}
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		for(int i=0;i<graphSkinList.size();i++){
 			GraphSkin skin = graphSkinList.get(i);
 			skin.setHeight(getHeight()-maxTopMargin-maxBottomMargin);
+			skin.setDrawPercent(percent);
 			skin.setWidth(getWidth());
 			skin.setTopMargin(maxTopMargin);
 			skin.setBottomMargin(maxBottomMargin);
