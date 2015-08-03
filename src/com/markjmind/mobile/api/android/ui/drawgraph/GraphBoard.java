@@ -91,12 +91,14 @@ public class GraphBoard extends View{
 		super.onDraw(canvas);
 		for(int i=0;i<graphSkinList.size();i++){
 			GraphSkin skin = graphSkinList.get(i);
-			skin.setHeight(getHeight()-maxTopMargin-maxBottomMargin);
-			skin.setDrawPercent(percent);
-			skin.setWidth(getWidth());
-			skin.setTopMargin(maxTopMargin);
-			skin.setBottomMargin(maxBottomMargin);
-			skin.draw(canvas);
+			if(skin.isShow){
+				skin.setHeight(getHeight()-maxTopMargin-maxBottomMargin);
+				skin.setDrawPercent(percent);
+				skin.setWidth(getWidth());
+				skin.setTopMargin(maxTopMargin);
+				skin.setBottomMargin(maxBottomMargin);
+				skin.draw(canvas);
+			}
 		}
 	}
 }

@@ -78,4 +78,9 @@ public abstract class GraphSkin {
 	public void setDrawPercent(float percent){
 		this.percent = percent;
 	}
+	
+	protected boolean isShow = true;
+	public void setShow(boolean isShow){
+		this.isShow = isShow;
+	}
 }
